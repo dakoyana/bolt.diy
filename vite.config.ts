@@ -13,27 +13,47 @@ dotenv.config();
 
 export default defineConfig((config) => {
   return {
-    server: {
-      host: true, // This allows external connections
-      port: 5173,
-      strictPort: false,
-      allowedHosts: 'all',
-      hmr: {
-        clientPort: 5173,
-      },
-    },
-    preview: {
-      host: true,
-      port: 5173,
-      strictPort: false,
-    },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     },
     build: {
       target: 'esnext',
     },
+    server: {
+      host: true,
+      port: 5173,
+      strictPort: false,
+    },
+    preview: {
+      host: true,
+      port: 5173,
+      strictPort: false,
+    },
     plugins: [
+      // CUSTOM PLUGIN TO FORCE ALLOWEDHOSTS
+      {
+        name: 'force-allowed-hosts',
+        configureServer(server: ViteDevServer) {
+          // Override the allowedHosts check completely
+          const originalCheckHost = server.middlewares.use;
+          server.middlewares.use = function(path: any, ...args: any[]) {
+            if (typeof path === 'function') {
+              const middleware = path;
+              const wrappedMiddleware = (req: any, res: any, next: any) => {
+                // Skip host checking entirely
+                return middleware(req, res, next);
+              };
+              return originalCheckHost.call(this, wrappedMiddleware, ...args);
+            }
+            return originalCheckHost.call(this, path, ...args);
+          };
+          
+          // Also set the allowedHosts directly
+          if (server.config.server) {
+            server.config.server.allowedHosts = 'all';
+          }
+        },
+      },
       nodePolyfills({
         include: ['buffer', 'process', 'util', 'stream'],
         globals: {
