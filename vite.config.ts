@@ -13,19 +13,27 @@ dotenv.config();
 
 export default defineConfig((config) => {
   return {
+    server: {
+      host: true, // This allows external connections
+      port: 5173,
+      strictPort: false,
+      allowedHosts: 'all',
+      hmr: {
+        clientPort: 5173,
+      },
+    },
+    preview: {
+      host: true,
+      port: 5173,
+      strictPort: false,
+    },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     },
     build: {
       target: 'esnext',
     },
-    server: {
-      host: '0.0.0.0',
-      port: 5173,
-      allowedHosts: 'all', // 👈 ADD THIS LINE
-    },
     plugins: [
-      // ... all your existing plugins stay the same
       nodePolyfills({
         include: ['buffer', 'process', 'util', 'stream'],
         globals: {
