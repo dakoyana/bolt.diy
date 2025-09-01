@@ -19,7 +19,13 @@ export default defineConfig((config) => {
     build: {
       target: 'esnext',
     },
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      allowedHosts: 'all', // 👈 ADD THIS LINE
+    },
     plugins: [
+      // ... all your existing plugins stay the same
       nodePolyfills({
         include: ['buffer', 'process', 'util', 'stream'],
         globals: {
@@ -78,7 +84,7 @@ export default defineConfig((config) => {
         '**/cypress/**',
         '**/.{idea,git,cache,output,temp}/**',
         '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
-        '**/tests/preview/**', // Exclude preview tests that require Playwright
+        '**/tests/preview/**',
       ],
     },
   };
